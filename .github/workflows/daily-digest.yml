@@ -1,6 +1,10 @@
 name: Daily Email Digest
 
 on:
+  push:
+    branches:
+      - main
+
   schedule:
     # Runs at 7:00 AM UTC every day
     # Use https://crontab.guru/ to convert to your timezone
