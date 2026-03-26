@@ -1,0 +1,36 @@
+# Core dependencies
+python-dotenv
+groq
+langgraph
+langchain
+langchain-groq
+langsmith
+
+# Gmail IMAP
+imaplib2
+email-validator
+
+# Telegram
+python-telegram-bot
+aiogram
+
+# MCP Server
+fastmcp
+mcp
+
+# Scheduling
+APScheduler
+
+# Utilities
+pydantic
+pydantic-settings
+beautifulsoup4
+html2text
+
+# Optional: For remote MCP deployment
+uvicorn
+fastapi
+
+# Testing
+pytest
+pytest-asyncio
