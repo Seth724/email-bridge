@@ -9,7 +9,21 @@ import os
 import sys
 import logging
 from dotenv import load_dotenv
+
+# Avoid shadowing the third-party `mcp` package with this local `mcp` folder
+# when deployment platforms import this file as a module from project root.
+_SERVER_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.dirname(_SERVER_DIR)
+_removed_entries = []
+for _entry in list(sys.path):
+    if _entry in ("", ".", _PROJECT_ROOT):
+        sys.path.remove(_entry)
+        _removed_entries.append(_entry)
+
 from fastmcp import FastMCP
+
+for _entry in reversed(_removed_entries):
+    sys.path.insert(0, _entry)
 
 
 logger = logging.getLogger(__name__)
