@@ -7,8 +7,12 @@ Supports both local (stdio) and remote (SSE) deployment.
 
 import os
 import sys
+import logging
 from dotenv import load_dotenv
 from fastmcp import FastMCP
+
+
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
