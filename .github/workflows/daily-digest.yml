@@ -1,15 +1,10 @@
 name: Daily Email Digest
 
 on:
-  push:
-    branches:
-      - main
-
   schedule:
-    # Runs at 7:00 AM UTC every day
-    # Use https://crontab.guru/ to convert to your timezone
-    # Example: 0 6 * * * = 6 AM UTC, 0 12 * * * = 12 PM UTC
-    - cron: '0 7 * * *'
+    # Runs at 7:00 AM Sri Lanka time (UTC+5:30) every day
+    # GitHub cron uses UTC, so 07:00 LK = 01:30 UTC
+    - cron: '30 1 * * *'
   
   # Allow manual trigger from GitHub Actions tab
   workflow_dispatch:
