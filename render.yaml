@@ -1,0 +1,28 @@
+services:
+  # Email Bridge Webhook Server
+  - type: web
+    name: email-bridge
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && pip install -r requirements-audio.txt
+    startCommand: python webhook_server.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DEPLOYMENT_MODE
+        value: remote
+      - key: PORT
+        value: 8000
+      # User needs to set these in Render dashboard
+      - key: GMAIL_ADDRESS
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false

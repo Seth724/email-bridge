@@ -7,14 +7,15 @@
         "install": {
           "dependsOn": ["python"],
           "cmds": [
-            "pip install -r requirements.txt"
+            "pip install -r requirements.txt",
+            "pip install -r requirements-audio.txt"
           ]
         }
       }
     }
   },
   "deploy": {
-    "startCommand": "python mcp/server.py --remote",
+    "startCommand": "python webhook_server.py",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",

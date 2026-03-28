@@ -37,19 +37,54 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.gmail import GmailFetcher
 from core.classifier import EmailClassifier
 from core.telegram import TelegramSender
+from core.audio import send_voice_summary as send_voice_summary_func
 from workflows.triage_graph import EmailTriageWorkflow
+
+# Auto-start webhook server in background for interactive button callbacks
+_webhook_thread = None
+
+
+def _start_webhook_background():
+    """Start webhook server in background thread"""
+    import threading
+
+    def run_server():
+        try:
+            # Lazy import to avoid dependency issues
+            import uvicorn
+            from webhook_server import app
+
+            uvicorn.run(app, host="127.0.0.1", port=8765, log_level="warning")
+        except ImportError as e:
+            logger.debug(f"Webhook dependencies not available: {e}")
+        except Exception as e:
+            logger.debug(f"Webhook server stopped: {e}")
+
+    _webhook_thread = threading.Thread(target=run_server, daemon=True)
+    _webhook_thread.start()
+    logger.info("Webhook server started on http://127.0.0.1:8765")
+
+
+# Start webhook server automatically when MCP server loads
+_start_webhook_background()
 
 # Initialize FastMCP server
 mcp = FastMCP(
     "Email Bridge",
     instructions="""
     Email Bridge MCP Server - Intelligent email triage and notifications.
-    
+
     Tools available:
     - check_emails: Fetch and classify unread emails
     - get_urgent_summary: Get summary of urgent emails only
-    - send_telegram_message: Send a message to Telegram
+    - send_telegram_message: Send a text message to Telegram
+    - send_voice_summary: Send a voice (audio) summary to Telegram
     - test_connection: Test Gmail and Telegram connections
+    - classify_email_sample: Classify a sample email (for testing)
+    - setup_webhook: Set up Telegram webhook for interactive buttons
+    - get_webhook_info: Get current webhook status
+
+    The webhook server auto-starts in the background. Use setup_webhook() to enable interactive button callbacks.
     """,
 )
 
@@ -148,11 +183,11 @@ def get_urgent_summary() -> str:
 def send_telegram_message(message: str, urgent: bool = False) -> bool:
     """
     Send a message to Telegram.
-    
+
     Args:
         message: Message text to send
         urgent: If True, send with sound notification
-    
+
     Returns:
         True if successful, False otherwise
     """
@@ -175,6 +210,26 @@ def send_telegram_message(message: str, urgent: bool = False) -> bool:
 
     except Exception as e:
         print(f"Error sending Telegram message: {e}")
+        return False
+
+
+@mcp.tool()
+def send_voice_summary(summary_text: str) -> bool:
+    """
+    Send a voice (audio) summary to Telegram.
+
+    Converts text to speech and sends as a voice message.
+
+    Args:
+        summary_text: Text to convert to voice message
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        return send_voice_summary_func(summary_text)
+    except Exception as e:
+        print(f"Error sending voice summary: {e}")
         return False
 
 
@@ -233,12 +288,12 @@ def test_connection() -> dict:
 def classify_email_sample(subject: str, sender: str, body: str) -> dict:
     """
     Classify a sample email (for testing).
-    
+
     Args:
         subject: Email subject
         sender: Email sender
         body: Email body text
-    
+
     Returns:
         Classification result
     """
@@ -252,6 +307,87 @@ def classify_email_sample(subject: str, sender: str, body: str) -> dict:
         result = classifier.classify_email(email_data)
 
         return result
+
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@mcp.tool()
+def setup_webhook(ngrok_url: str = None) -> dict:
+    """
+    Set up Telegram webhook for interactive button callbacks.
+
+    Args:
+        ngrok_url: Optional ngrok URL (e.g., "https://abc123.ngrok.io").
+                   If not provided, uses localhost for local testing.
+
+    Returns:
+        Dictionary with setup status
+    """
+    import requests
+
+    try:
+        bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+        if not bot_token:
+            return {"status": "error", "message": "TELEGRAM_BOT_TOKEN not set"}
+
+        # Determine webhook URL
+        if ngrok_url:
+            webhook_url = f"{ngrok_url}/webhook"
+        else:
+            # Use a public tunnel service or localhost
+            webhook_url = "http://127.0.0.1:8765/webhook"
+
+        # Register webhook with Telegram
+        url = f"https://api.telegram.org/bot{bot_token}/setWebhook"
+        payload = {
+            "url": webhook_url,
+            "allowed_updates": ["callback_query", "message"],
+        }
+
+        response = requests.post(url, json=payload, timeout=10)
+        result = response.json()
+
+        if result.get("ok"):
+            return {
+                "status": "success",
+                "message": f"Webhook set to {webhook_url}",
+                "webhook_url": webhook_url,
+                "note": "Interactive buttons will now work when you click them!",
+            }
+        else:
+            return {
+                "status": "error",
+                "message": f"Failed to set webhook: {result}",
+            }
+
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@mcp.tool()
+def get_webhook_info() -> dict:
+    """
+    Get current Telegram webhook status.
+
+    Returns:
+        Dictionary with webhook information
+    """
+    import requests
+
+    try:
+        bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+        if not bot_token:
+            return {"status": "error", "message": "TELEGRAM_BOT_TOKEN not set"}
+
+        url = f"https://api.telegram.org/bot{bot_token}/getWebhookInfo"
+        response = requests.get(url, timeout=10)
+        result = response.json()
+
+        return {
+            "status": "success" if result.get("ok") else "error",
+            "webhook_info": result.get("result", {}),
+        }
 
     except Exception as e:
         return {"status": "error", "message": str(e)}

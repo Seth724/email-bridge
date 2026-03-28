@@ -215,8 +215,61 @@ class GmailFetcher:
             if self.mail:
                 self.mail.store(email_id.encode(), "+FLAGS", "\\Seen")
                 logger.info(f"Marked email {email_id} as read")
+                return True
         except Exception as e:
             logger.error(f"Error marking email as read: {e}")
+        return False
+
+    def archive_email(self, email_id: str):
+        """Archive email (move to All Mail)"""
+        try:
+            if self.mail:
+                # Archive by removing from INBOX label
+                self.mail.store(email_id.encode(), "-FLAGS", "\\Seen")
+                self.mail.copy(email_id.encode(), "[Gmail]/All Mail")
+                self.mail.store(email_id.encode(), "+FLAGS", "\\Deleted")
+                self.mail.expunge()
+                logger.info(f"Archived email {email_id}")
+                return True
+        except Exception as e:
+            logger.error(f"Error archiving email: {e}")
+        return False
+
+    def mark_as_unread(self, email_id: str):
+        """Mark email as unread"""
+        try:
+            if self.mail:
+                self.mail.store(email_id.encode(), "-FLAGS", "\\Seen")
+                logger.info(f"Marked email {email_id} as unread")
+                return True
+        except Exception as e:
+            logger.error(f"Error marking email as unread: {e}")
+        return False
+
+    def delete_email(self, email_id: str):
+        """Delete email permanently"""
+        try:
+            if self.mail:
+                self.mail.store(email_id.encode(), "+FLAGS", "\\Deleted")
+                self.mail.expunge()
+                logger.info(f"Deleted email {email_id}")
+                return True
+        except Exception as e:
+            logger.error(f"Error deleting email: {e}")
+        return False
+
+    def move_to_label(self, email_id: str, label: str):
+        """Move email to a specific label"""
+        try:
+            if self.mail:
+                self.mail.copy(email_id.encode(), label)
+                self.mail.store(email_id.encode(), "+FLAGS", "\\Deleted")
+                self.mail.expunge()
+                logger.info(f"Moved email {email_id} to {label}")
+                return True
+        except Exception as e:
+            logger.error(f"Error moving email to label: {e}")
+        return False
 
     def get_email_count(self, unread_only: bool = True) -> int:
         """Get count of emails in inbox"""
