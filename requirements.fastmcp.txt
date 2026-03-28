@@ -1,0 +1,21 @@
+# Minimal dependencies for hosted FastMCP deployment
+python-dotenv
+fastmcp
+
+# Email fetch + parsing
+html2text
+requests
+
+# Classification stack used by core/classifier.py
+langgraph
+langchain
+langchain-groq
+langsmith
+groq
+
+# Keep compatibility with existing imports
+imaplib2
+email-validator
+pydantic
+pydantic-settings
+beautifulsoup4
