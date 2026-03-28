@@ -25,7 +25,28 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+
+def run_webhook_server():
+    """Run webhook server in background thread"""
+    import uvicorn
+    
+    # Import app from webhook_server module
+    from webhook_server import app
+    
+    # Webhook runs on same port, different path
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", 8000))
+    
+    logger.info(f"Starting webhook server on {host}:{port}/webhook")
+    
+    try:
+        uvicorn.run(app, host=host, port=port, log_level="info")
+    except Exception as e:
+        logger.error(f"Webhook server error: {e}")
 
 
 def run_mcp_server():
@@ -43,23 +64,6 @@ def run_mcp_server():
         mcp.run(transport=transport, host=host, port=port, path=path)
     except Exception as e:
         logger.error(f"MCP server error: {e}")
-
-
-def run_webhook_server():
-    """Run webhook server in background thread"""
-    import uvicorn
-    from webhook_server import app
-    
-    # Webhook runs on same port, different path
-    host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", 8000))
-    
-    logger.info(f"Starting webhook server on {host}:{port}/webhook")
-    
-    try:
-        uvicorn.run(app, host=host, port=port, log_level="info")
-    except Exception as e:
-        logger.error(f"Webhook server error: {e}")
 
 
 def main():

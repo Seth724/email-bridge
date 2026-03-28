@@ -1,6 +1,7 @@
 # Minimal dependencies for hosted FastMCP deployment
 python-dotenv
 fastmcp
+mcp
 
 # Email fetch + parsing
 html2text
@@ -19,3 +20,8 @@ email-validator
 pydantic
 pydantic-settings
 beautifulsoup4
+
+# Webhook server
+fastapi
+uvicorn
+gTTS
