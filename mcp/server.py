@@ -267,11 +267,19 @@ def main() -> None:
     )
 
     if run_remote:
-        # Run as HTTP SSE server for hosted deployment
+        # FastMCP v3 uses run(transport=...) for HTTP/SSE transports.
         host = os.getenv("HOST", "0.0.0.0")
         port = int(os.getenv("PORT", "8000"))
-        logger.info("Starting MCP server in remote mode (SSE) on %s:%s", host, port)
-        mcp.run_sse(host=host, port=port)
+        transport = os.getenv("MCP_TRANSPORT", "streamable-http")
+        path = os.getenv("MCP_PATH", "/mcp")
+        logger.info(
+            "Starting MCP server in remote mode (%s) on %s:%s%s",
+            transport,
+            host,
+            port,
+            path,
+        )
+        mcp.run(transport=transport, host=host, port=port, path=path)
     else:
         # Run as local stdio server
         logger.info("Starting MCP server in local mode (stdio)...")
