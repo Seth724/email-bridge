@@ -25,6 +25,7 @@ pydantic
 pydantic-settings
 beautifulsoup4
 html2text
+requests
 
 # Optional: For remote MCP deployment
 uvicorn

@@ -38,6 +38,7 @@ setup(
         "pydantic>=2.0.0",
         "beautifulsoup4>=4.12.0",
         "html2text>=2024.0.0",
+        "requests>=2.31.0",
     ],
     extras_require={
         "dev": [
