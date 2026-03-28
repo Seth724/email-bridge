@@ -16,7 +16,6 @@ aiogram
 
 # MCP Server
 fastmcp
-mcp
 
 # Scheduling
 APScheduler

@@ -41,6 +41,10 @@ jobs:
           
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+          # Disable quiet hours so 01:30 UTC (7:00 LK) sends the digest
+          QUIET_HOURS_START: '0'
+          QUIET_HOURS_END: '0'
           
           # Optional: LangSmith tracing
           LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}

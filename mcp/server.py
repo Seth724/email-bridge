@@ -257,16 +257,27 @@ def classify_email_sample(subject: str, sender: str, body: str) -> dict:
         return {"status": "error", "message": str(e)}
 
 
-# Run server if executed directly
-if __name__ == "__main__":
+def main() -> None:
+    """Run Email Bridge MCP server in local (stdio) or remote (SSE) mode."""
     import sys
-    
-    # Check if running as remote server
-    if len(sys.argv) > 1 and sys.argv[1] == "--remote":
-        # Run as HTTP SSE server for remote deployment
-        logger.info("Starting MCP server in remote mode (SSE)...")
-        mcp.run_sse(host="0.0.0.0", port=8000)
+
+    deployment_mode = os.getenv("DEPLOYMENT_MODE", "").strip().lower()
+    run_remote = deployment_mode == "remote" or (
+        len(sys.argv) > 1 and sys.argv[1] == "--remote"
+    )
+
+    if run_remote:
+        # Run as HTTP SSE server for hosted deployment
+        host = os.getenv("HOST", "0.0.0.0")
+        port = int(os.getenv("PORT", "8000"))
+        logger.info("Starting MCP server in remote mode (SSE) on %s:%s", host, port)
+        mcp.run_sse(host=host, port=port)
     else:
         # Run as local stdio server
         logger.info("Starting MCP server in local mode (stdio)...")
         mcp.run()
+
+
+# Run server if executed directly
+if __name__ == "__main__":
+    main()
