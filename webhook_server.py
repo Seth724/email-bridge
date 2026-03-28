@@ -44,7 +44,22 @@ async def startup_event():
         await set_webhook(webhook_url)
         logger.info(f"Auto-registered webhook: {webhook_url}")
     else:
-        logger.info("Running locally - webhook not auto-registered")
+        logger.info("Running locally - webhook not auto-registered (use setup_webhook tool)")
+
+
+@app.get("/mcp")
+async def mcp_info():
+    """MCP server info endpoint"""
+    return {
+        "service": "Email Bridge MCP",
+        "status": "running",
+        "endpoints": {
+            "mcp": "/mcp (streamable-http)",
+            "sse": "/sse",
+            "webhook": "/webhook (POST)",
+            "health": "/health",
+        }
+    }
 
 
 @app.on_event("shutdown")

@@ -9,6 +9,19 @@
 
 **Perfect for Email Bridge!** ✅
 
+## What You Get
+
+When deployed, your server will have:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/mcp` | MCP server (Claude Desktop connects here) |
+| `/sse` | MCP SSE transport (alternative) |
+| `/webhook` | Telegram button callbacks |
+| `/health` | Health check |
+
+**Both MCP + Webhook run on same port!**
+
 ---
 
 ## Method 1: Deploy from GitHub (Recommended)
@@ -49,8 +62,10 @@ git push -u origin main
 - **Root Directory**: (leave blank)
 - **Runtime**: `Python`
 - **Build Command**: `pip install -r requirements.txt && pip install -r requirements-audio.txt`
-- **Start Command**: `python webhook_server.py`
+- **Start Command**: `python combined_server.py`
 - **Instance Type**: **Free**
+
+**Important:** Use `combined_server.py` - it runs BOTH MCP server and webhook server!
 
 ### Step 5: Add Environment Variables
 
@@ -151,23 +166,25 @@ Follow steps 4-10 from Method 1 above.
 
 ### Edit Config
 
-```json
-{
-  "mcpServers": {
-    "email-bridge": {
-      "url": "https://email-bridge.onrender.com/sse"
-    }
-  }
-}
-```
-
-Or with streamable-http (FastMCP v3):
+**For streamable-http transport (recommended):**
 
 ```json
 {
   "mcpServers": {
     "email-bridge": {
       "url": "https://email-bridge.onrender.com/mcp"
+    }
+  }
+}
+```
+
+**For SSE transport (alternative):**
+
+```json
+{
+  "mcpServers": {
+    "email-bridge": {
+      "url": "https://email-bridge.onrender.com/sse"
     }
   }
 }
