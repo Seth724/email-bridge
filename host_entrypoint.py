@@ -8,6 +8,7 @@ local server file explicitly by path and exposes `mcp` for the host runtime.
 from __future__ import annotations
 
 import importlib.util
+import os
 from pathlib import Path
 
 _SERVER_FILE = Path(__file__).resolve().parent / "mcp" / "server.py"
@@ -20,6 +21,11 @@ _SPEC.loader.exec_module(_MODULE)
 
 # Exported symbol for hosted entrypoint, e.g. host_entrypoint.py:mcp
 mcp = _MODULE.mcp
+
+# ASGI app export for hosts that expect an application object (main.py:app style).
+_transport = os.getenv("MCP_TRANSPORT", "streamable-http")
+_path = os.getenv("MCP_PATH", "/mcp")
+app = mcp.http_app(transport=_transport, path=_path)
 
 
 def main() -> None:
